@@ -1,0 +1,6 @@
+<!--puce de liste-->
+<!ENTITY circle "&#9711;">
+<!ENTITY bcircle "&#x2B24;">
+
+<!--commun char-->
+<!ENTITY nbsp "&#160;">

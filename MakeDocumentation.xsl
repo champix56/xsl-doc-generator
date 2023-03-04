@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
 	<xsl:include href="lib.components.xsl.xsl"/>
 	<xsl:include href="lib.components.html.xsl"/>
-	<xsl:param name="baseUrl">../</xsl:param>
+	<xsl:param name="baseUrl">democontent/</xsl:param>
 	<xsl:param name="xslDoc">
 		<docs>
 			<!--force an include file non auto with :<doc title="components " titleCmplement="defTab" path="../lib.components.deftab.extra.xsl"/>-->
