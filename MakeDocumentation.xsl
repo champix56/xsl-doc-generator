@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xsl:stylesheet [
+	<!ENTITY nbsp "&#160;">
+]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
 	<xsl:include href="lib.components.xsl.xsl"/>
 	<xsl:include href="lib.components.html.xsl"/>
@@ -9,18 +12,25 @@
 			<xsl:call-template name="process-auto-recurs-include"/>
 		</docs>
 	</xsl:param>
+	<xsl:variable name="uiniqueInclude">
+		<docs>
+			<xsl:copy-of select="$xslDoc//doc[not(preceding::doc/@path=./@path) and not(following::doc/@path=./@path)]"/>
+		</docs>
+	</xsl:variable>
 	<xsl:variable name="contentList">
 		<contents>
 			<xsl:call-template name="process-auto-list-content"/>
 		</contents>
 	</xsl:variable>
 	<xsl:template name="process-auto-list-content">
-		<xsl:apply-templates select="$xslDoc//doc" mode="auto-list-content"/>
+		<xsl:apply-templates select="$uiniqueInclude//doc" mode="auto-list-content"/>
 	</xsl:template>
 	<xsl:template match="docs/doc" mode="auto-list-content">
 		<xsl:variable name="docToList" select="document(@path)"/>
 		<doc path="{@path}">
-			<xsl:apply-templates select="$docToList//xsl:template|$docToList//xsl:attribute-set" mode="auto-list-content"/>
+			<xsl:apply-templates select="$docToList//xsl:template|$docToList//xsl:attribute-set" mode="auto-list-content">
+				<xsl:sort select="name()"/>
+			</xsl:apply-templates>
 		</doc>
 	</xsl:template>
 	<xsl:template match="xsl:attribute-set" mode="auto-list-content">
@@ -44,30 +54,75 @@
 			</xsl:choose>
 		</template>
 	</xsl:template>
+	<xsl:template match="contents/doc">
+		<xsl:param name="type"/>
+		<xsl:variable name="selectedNodes" select="*[name()=$type or ($type='name' and @name) or($type='match' and @match) ]"/>
+		<xsl:if test="count($selectedNodes)>=1">
+			<fo:table-row>
+				<fo:table-cell>
+					<fo:block text-decoration="underline" font-weight="900" font-style="italic" margin-top="3mm">fichier : <xsl:value-of select="@path"/>
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
+			<xsl:apply-templates select="$selectedNodes"/>
+		</xsl:if>
+	</xsl:template>
+	<xsl:template match="contents/doc/*">
+		<fo:table-row>
+			<fo:table-cell padding="2mm">
+				<fo:block text-align-last="justify">
+					<fo:basic-link internal-destination="{@id}">
+						<xsl:value-of select="name()"/>&nbsp;<xsl:choose>
+							<xsl:when test="self::style">
+								<xsl:text> </xsl:text>
+								<xsl:value-of select="@name"/>
+							</xsl:when>
+							<xsl:when test="self::template and @name"> name : <xsl:value-of select="@name"/>
+							</xsl:when>
+							<xsl:when test="self::template and @match">match : <xsl:value-of select="@match"/>
+							</xsl:when>
+						</xsl:choose>
+						<fo:leader leader-pattern="dots"/>p<fo:page-number-citation ref-id="{@id}"/>
+					</fo:basic-link>
+				</fo:block>
+			</fo:table-cell>
+		</fo:table-row>
+	</xsl:template>
 	<xsl:template name="sommaire">
 		<fo:block break-before="page">
-			<fo:block text-align="center" font-size="16pt" font-weight="900">Sommaire</fo:block>
+			<fo:block text-align="center" font-size="16pt" font-weight="900" margin-top="5mm">Sommaire</fo:block>
 			<fo:block text-align="left" font-size="12pt" font-weight="500">
-				<xsl:for-each select="$contentList/contents/doc/*">
-					<xsl:sort select="name()"/>
-					<xsl:sort select="@match"/>
-					<xsl:sort select="@name"/>
-					<fo:block margin-left="5mm">
-						<fo:basic-link internal-destination="{@id}">
-							<xsl:value-of select="name()"/>
-							<xsl:text> </xsl:text>
-							<xsl:choose>
-								<xsl:when test="self::style">
-									<xsl:text> </xsl:text><xsl:value-of select="@name"/>
-								</xsl:when>
-								<xsl:when test="self::template and @name"> name : <xsl:value-of select="@name"/>
-								</xsl:when>
-								<xsl:when test="self::template and @match">match : <xsl:value-of select="@match"/>
-								</xsl:when>
-							</xsl:choose> ... p<fo:page-number-citation ref-id="{@id}"/>
-						</fo:basic-link>
-					</fo:block>
-				</xsl:for-each>
+				<fo:table margin-left="5mm" margin-right="5mm">
+					<fo:table-body>
+						<fo:table-row>
+							<fo:table-cell>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Styles xsl-fo</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+						<xsl:apply-templates select="$contentList/contents/doc">
+							<xsl:sort select="name(../@path)"/>
+							<xsl:with-param name="type" select=" 'style' "/>
+						</xsl:apply-templates>
+						<fo:table-row>
+							<fo:table-cell>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" text-decoration="underline">templates name</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+						<xsl:apply-templates select="$contentList/contents/doc">
+							<xsl:sort select="name(../@path)"/>
+							<xsl:with-param name="type" select=" 'name' "/>
+						</xsl:apply-templates>
+						<fo:table-row>
+							<fo:table-cell>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" text-decoration="underline">Template match</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+						<xsl:apply-templates select="$contentList/contents/doc">
+							<xsl:sort select="name(../@path)"/>
+							<xsl:with-param name="type" select=" 'match' "/>
+						</xsl:apply-templates>
+					</fo:table-body>
+				</fo:table>
 			</fo:block>
 		</fo:block>
 	</xsl:template>
