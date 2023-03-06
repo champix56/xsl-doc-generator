@@ -2,9 +2,9 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
 	<xsl:import href="lib.common.data.access.xsl"/>
 	<xsl:include href="lib.service-data.xsl"/>
-	<xsl:variable name="variabletest"><a><b xyz="fghj">abc</b></a></xsl:variable>
-	<xsl:param name="paperWidth" select=" '210mm' "/>
-	<xsl:param name="paperheight" select=" '297mm' "/>
+	<xsl:variable name="variabletest"><!--test de contenu XML dans var/param--><a><b xyz="fghj">abc</b></a></xsl:variable>
+	<xsl:param name="paperWidth" select=" '210mm' "><!--constante de char par select--></xsl:param>
+	<xsl:param name="paperheight">297mm</xsl:param>
 	<xsl:template name="layouts-sets">
 	<!--definition des formats de papiers standards avec entete et pieds-->
 		<fo:simple-page-master master-name="A4PortraitBeforeAfterStart" page-height="{$paperheight}" page-width="{$paperWidth}">
