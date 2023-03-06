@@ -200,7 +200,7 @@
 			<xsl:apply-templates select="$doc/xsl:stylesheet/xsl:param"/>
 		</xsl:if>
 		<xsl:if test="$doc/xsl:stylesheet/xsl:variable">
-			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des styles du fichiers</fo:block>
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des variables globales du fichiers</fo:block>
 			<xsl:apply-templates select="$doc/xsl:stylesheet/xsl:variable"/>
 		</xsl:if>
 		<xsl:if test="$doc//xsl:attribute-set">
@@ -212,7 +212,7 @@
 			<xsl:apply-templates select="$doc//xsl:template[@match]"/>
 		</xsl:if>
 		<xsl:if test="$doc//xsl:template[@name]">
-			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des templates match du fichiers</fo:block>
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des templates name du fichiers</fo:block>
 			<xsl:apply-templates select="$doc//xsl:template[@name]"/>
 		</xsl:if>
 	</xsl:template>
