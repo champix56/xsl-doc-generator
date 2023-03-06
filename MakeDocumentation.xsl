@@ -3,6 +3,15 @@
 	<!ENTITY nbsp "&#160;">
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
+<xsl:template match="*"><fo:block margin-left="5mm">&lt;<xsl:value-of select="name()"/>
+<xsl:for-each select="@*"><xsl:text> </xsl:text><xsl:value-of select="name()"/>="<xsl:value-of select="."/>"</xsl:for-each>
+<xsl:choose>
+	<xsl:when test="child::*|text()">&gt;<fo:block><xsl:apply-templates  select="*|text()"/></fo:block>&lt;/<xsl:value-of select="name()"/>&gt;</xsl:when>
+	<xsl:otherwise>/&gt;</xsl:otherwise>
+</xsl:choose>
+
+</fo:block>
+</xsl:template>
 	<xsl:include href="lib.components.xsl.xsl"/>
 	<xsl:include href="lib.components.html.xsl"/>
 	<xsl:param name="baseUrl">democontent/</xsl:param>
@@ -28,10 +37,22 @@
 	<xsl:template match="docs/doc" mode="auto-list-content">
 		<xsl:variable name="docToList" select="document(@path)"/>
 		<doc path="{@path}">
-			<xsl:apply-templates select="$docToList//xsl:template|$docToList//xsl:attribute-set" mode="auto-list-content">
+			<xsl:apply-templates select="$docToList/xsl:stylesheet/xsl:template|$docToList/xsl:stylesheet/xsl:attribute-set|$docToList/xsl:stylesheet/xsl:variable|$docToList/xsl:stylesheet/xsl:param" mode="auto-list-content">
 				<xsl:sort select="name()"/>
 			</xsl:apply-templates>
 		</doc>
+	</xsl:template>
+	<xsl:template match="xsl:variable" mode="auto-list-content">
+		<xsl:variable name="nodeid">
+			<xsl:call-template name="getIdName"/>
+		</xsl:variable>
+		<variable name="{@name}" id="{$nodeid}"/>
+	</xsl:template>
+	<xsl:template match="xsl:param" mode="auto-list-content">
+		<xsl:variable name="nodeid">
+			<xsl:call-template name="getIdName"/>
+		</xsl:variable>
+		<param name="{@name}" id="{$nodeid}"/>
 	</xsl:template>
 	<xsl:template match="xsl:attribute-set" mode="auto-list-content">
 		<xsl:variable name="nodeid">
@@ -56,7 +77,7 @@
 	</xsl:template>
 	<xsl:template match="contents/doc">
 		<xsl:param name="type"/>
-		<xsl:variable name="selectedNodes" select="*[name()=$type or ($type='name' and @name) or($type='match' and @match) ]"/>
+		<xsl:variable name="selectedNodes" select="*[name()=$type or (name()='template' and(($type='name' and @name  ) or($type='match' and @match))) ]"/>
 		<xsl:if test="count($selectedNodes)>=1">
 			<fo:table-row>
 				<fo:table-cell>
@@ -73,7 +94,7 @@
 				<fo:block text-align-last="justify">
 					<fo:basic-link internal-destination="{@id}">
 						<xsl:value-of select="name()"/>&nbsp;<xsl:choose>
-							<xsl:when test="self::style">
+							<xsl:when test="self::style or self::param or self::variable">
 								<xsl:text> </xsl:text>
 								<xsl:value-of select="@name"/>
 							</xsl:when>
@@ -96,6 +117,24 @@
 					<fo:table-body>
 						<fo:table-row>
 							<fo:table-cell>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Params globaux xsl</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+						<xsl:apply-templates select="$contentList/contents/doc">
+							<xsl:sort select="name(../@path)"/>
+							<xsl:with-param name="type" select=" 'param' "/>
+						</xsl:apply-templates>
+						<fo:table-row>
+							<fo:table-cell>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Variables globales xsl</fo:block>
+							</fo:table-cell>
+						</fo:table-row>
+						<xsl:apply-templates select="$contentList/contents/doc">
+							<xsl:sort select="name(../@path)"/>
+							<xsl:with-param name="type" select=" 'variable' "/>
+						</xsl:apply-templates>
+						<fo:table-row>
+							<fo:table-cell>
 								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Styles xsl-fo</fo:block>
 							</fo:table-cell>
 						</fo:table-row>
@@ -105,7 +144,7 @@
 						</xsl:apply-templates>
 						<fo:table-row>
 							<fo:table-cell>
-								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" text-decoration="underline">templates name</fo:block>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">templates name</fo:block>
 							</fo:table-cell>
 						</fo:table-row>
 						<xsl:apply-templates select="$contentList/contents/doc">
@@ -114,7 +153,7 @@
 						</xsl:apply-templates>
 						<fo:table-row>
 							<fo:table-cell>
-								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" text-decoration="underline">Template match</fo:block>
+								<fo:block margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Template match</fo:block>
 							</fo:table-cell>
 						</fo:table-row>
 						<xsl:apply-templates select="$contentList/contents/doc">
@@ -156,20 +195,58 @@
 				<xsl:apply-templates select="$includeInDoc"/>
 			</fo:block>
 		</xsl:if>
-		<xsl:apply-templates select="$doc//xsl:template"/>
+		<xsl:if test="$doc/xsl:stylesheet/xsl:param">
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des params globaux du fichiers</fo:block>
+			<xsl:apply-templates select="$doc/xsl:stylesheet/xsl:param"/>
+		</xsl:if>
+		<xsl:if test="$doc/xsl:stylesheet/xsl:variable">
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des styles du fichiers</fo:block>
+			<xsl:apply-templates select="$doc/xsl:stylesheet/xsl:variable"/>
+		</xsl:if>
 		<xsl:if test="$doc//xsl:attribute-set">
-			<fo:block font-weight="700" text-align="center">Liste des styles du fichiers</fo:block>
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des styles du fichiers</fo:block>
 			<xsl:apply-templates select="$doc//xsl:attribute-set"/>
+		</xsl:if>
+		<xsl:if test="$doc//xsl:template[@match]">
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des templates match du fichiers</fo:block>
+			<xsl:apply-templates select="$doc//xsl:template[@match]"/>
+		</xsl:if>
+		<xsl:if test="$doc//xsl:template[@name]">
+			<fo:block margin-right="3mm" margin-left="3mm" margin-top="8mm" font-size="14pt" font-weight="900" border-bottom="0.3mm solid black">Liste des templates match du fichiers</fo:block>
+			<xsl:apply-templates select="$doc//xsl:template[@name]"/>
 		</xsl:if>
 	</xsl:template>
 	<xsl:template match="/">
 		<fo:root>
 			<fo:layout-master-set>
-				<fo:simple-page-master master-name="A4" page-height="297mm" page-width="210mm">
+			
+				<fo:simple-page-master master-name="A4full" page-height="297mm" page-width="210mm">
 					<fo:region-body/>
 				</fo:simple-page-master>
+				<fo:simple-page-master master-name="A4" page-height="297mm" page-width="210mm">
+					<fo:region-body margin-bottom="5mm"/>
+					<fo:region-after extent="0.5cm"/>
+				</fo:simple-page-master>
+				<fo:page-sequence-master master-name="docA4">
+					<fo:repeatable-page-master-alternatives>
+						<fo:conditional-page-master-reference master-reference="A4full" page-position="first"/>
+						<fo:conditional-page-master-reference master-reference="A4" page-position="any"/>
+					</fo:repeatable-page-master-alternatives>
+				</fo:page-sequence-master>
 			</fo:layout-master-set>
-			<fo:page-sequence master-reference="A4">
+			<fo:page-sequence master-reference="docA4">
+			<fo:static-content flow-name="xsl-region-after">
+				<fo:block margin-left="5mm" margin-right="2mm" font-size="6pt">
+					<fo:table>
+						<fo:table-body>
+							<fo:table-row>
+								<fo:table-cell><fo:block>Documentation  XSL</fo:block></fo:table-cell>
+								<fo:table-cell text-align="right"><fo:block>p <fo:page-number/> / <fo:page-number-citation ref-id="enddod"/></fo:block></fo:table-cell>
+							</fo:table-row>
+						</fo:table-body>
+					</fo:table>
+				</fo:block>
+			</fo:static-content>
 				<fo:flow flow-name="xsl-region-body">
 					<fo:block>
 						<fo:block font-size="18pt" text-align="center" margin-top="40%">
@@ -191,6 +268,7 @@
 						</xsl:for-each>
 						<!--<xsl:call-template name="annexe"/>-->
 					</fo:block>
+					<fo:block id="enddod"/>
 				</fo:flow>
 			</fo:page-sequence>
 		</fo:root>

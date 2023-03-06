@@ -2,15 +2,18 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
 	<xsl:import href="lib.common.data.access.xsl"/>
 	<xsl:include href="lib.service-data.xsl"/>
+	<xsl:variable name="variabletest"><a><b xyz="fghj">abc</b></a></xsl:variable>
+	<xsl:param name="paperWidth" select=" '210mm' "/>
+	<xsl:param name="paperheight" select=" '297mm' "/>
 	<xsl:template name="layouts-sets">
 	<!--definition des formats de papiers standards avec entete et pieds-->
-		<fo:simple-page-master master-name="A4PortraitBeforeAfterStart" page-height="297mm" page-width="21cm">
+		<fo:simple-page-master master-name="A4PortraitBeforeAfterStart" page-height="{$paperheight}" page-width="{$paperWidth}">
 			<fo:region-body margin-left="7cm" margin-top="5cm" margin-bottom="12mm"/>
 			<fo:region-before extent="5cm" background-color="skyblue"/>
 			<fo:region-after extent="12mm"/>
 			<fo:region-start extent="7cm"/>
 		</fo:simple-page-master>
-		<fo:simple-page-master master-name="A4PortraitBeforeAfter" page-height="297mm" page-width="21cm">
+		<fo:simple-page-master master-name="A4PortraitBeforeAfter" page-height="{$paperheight}" page-width="{$paperWidth}">
 			<fo:region-body margin-top="5cm" margin-bottom="12mm"/>
 			<fo:region-before extent="5cm" background-color="tomato" region-name="xsl-region-before-rest"/>
 			<fo:region-after extent="12mm"/>

@@ -26,6 +26,21 @@
 			</fo:block>
 		</fo:block>
 	</xsl:template>
+	<xsl:template match="xsl:param|xsl:variable">
+	<xsl:variable name="nodeid">
+			<xsl:call-template name="getIdName"/>
+		</xsl:variable>
+		<fo:block margin="5mm" border="0.3mm solid black" page-break-inside="avoid" id="{$nodeid}">
+			<fo:block font-weight="900" text-align="center"><xsl:value-of select="substring(name(),5)"/><xsl:text> $</xsl:text> <xsl:value-of select="@name"/></fo:block>
+			<fo:block border-bottom="0.3mm solid black" margin="3mm" text-align="center">
+				<xsl:value-of select="comment()[1]"/>
+			</fo:block>
+			<fo:block>
+				<xsl:apply-templates select="@select|text()|*" />
+			</fo:block>
+		</fo:block>
+		</xsl:template>
+ 
 	<xsl:template match="xsl:template[@match]">
 		<xsl:variable name="nodeid">
 			<xsl:call-template name="getIdName"/>
@@ -35,7 +50,7 @@
 				<xsl:if test="@mode">mode="<xsl:value-of select="mode"/>"</xsl:if>
 			</fo:block>
 			<fo:block border-bottom="0.3mm solid black" margin="3mm" text-align="center">
-				<xsl:value-of select="comment()"/>
+				<xsl:value-of select="comment()[1]"/>
 			</fo:block>
 			<fo:block>
 				<xsl:apply-templates select="text()|fo:*|xsl:for-each|xsl:value-of|xsl:apply-templates"/>
