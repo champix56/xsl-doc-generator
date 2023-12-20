@@ -3,15 +3,19 @@
 	<!ENTITY nbsp "&#160;">
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format">
-<xsl:template match="*"><fo:block margin-left="5mm">&lt;<xsl:value-of select="name()"/>
-<xsl:for-each select="@*"><xsl:text> </xsl:text><xsl:value-of select="name()"/>="<xsl:value-of select="."/>"</xsl:for-each>
-<xsl:choose>
-	<xsl:when test="child::*|text()">&gt;<fo:block><xsl:apply-templates  select="*|text()"/></fo:block>&lt;/<xsl:value-of select="name()"/>&gt;</xsl:when>
-	<xsl:otherwise>/&gt;</xsl:otherwise>
-</xsl:choose>
-
-</fo:block>
-</xsl:template>
+	<xsl:template match="*">
+		<fo:block margin-left="5mm">&lt;<xsl:value-of select="name()"/>
+			<xsl:for-each select="@*">
+				<xsl:text> </xsl:text>
+				<xsl:value-of select="name()"/>="<xsl:value-of select="."/>"</xsl:for-each>
+			<xsl:choose>
+				<xsl:when test="child::*|text()">&gt;<fo:block>
+						<xsl:apply-templates select="*|text()"/>
+					</fo:block>&lt;/<xsl:value-of select="name()"/>&gt;</xsl:when>
+				<xsl:otherwise>/&gt;</xsl:otherwise>
+			</xsl:choose>
+		</fo:block>
+	</xsl:template>
 	<xsl:include href="lib.components.xsl.xsl"/>
 	<xsl:include href="lib.components.html.xsl"/>
 	<xsl:param name="baseUrl">democontent/</xsl:param>
@@ -219,7 +223,6 @@
 	<xsl:template match="/">
 		<fo:root>
 			<fo:layout-master-set>
-			
 				<fo:simple-page-master master-name="A4full" page-height="297mm" page-width="210mm">
 					<fo:region-body/>
 				</fo:simple-page-master>
@@ -235,18 +238,23 @@
 				</fo:page-sequence-master>
 			</fo:layout-master-set>
 			<fo:page-sequence master-reference="docA4">
-			<fo:static-content flow-name="xsl-region-after">
-				<fo:block margin-left="5mm" margin-right="2mm" font-size="6pt">
-					<fo:table>
-						<fo:table-body>
-							<fo:table-row>
-								<fo:table-cell><fo:block>Documentation  XSL</fo:block></fo:table-cell>
-								<fo:table-cell text-align="right"><fo:block>p <fo:page-number/> / <fo:page-number-citation ref-id="enddod"/></fo:block></fo:table-cell>
-							</fo:table-row>
-						</fo:table-body>
-					</fo:table>
-				</fo:block>
-			</fo:static-content>
+				<fo:static-content flow-name="xsl-region-after">
+					<fo:block margin-left="5mm" margin-right="2mm" font-size="6pt">
+						<fo:table>
+							<fo:table-body>
+								<fo:table-row>
+									<fo:table-cell>
+										<fo:block>Documentation  XSL</fo:block>
+									</fo:table-cell>
+									<fo:table-cell text-align="right">
+										<fo:block>p <fo:page-number/> / <fo:page-number-citation ref-id="enddod"/>
+										</fo:block>
+									</fo:table-cell>
+								</fo:table-row>
+							</fo:table-body>
+						</fo:table>
+					</fo:block>
+				</fo:static-content>
 				<fo:flow flow-name="xsl-region-body">
 					<fo:block>
 						<fo:block font-size="18pt" text-align="center" margin-top="40%">
